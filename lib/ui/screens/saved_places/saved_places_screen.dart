@@ -28,6 +28,10 @@ class SavedPlacesScreen extends StatelessWidget with GetItMixin {
     if (result == true) placesLogic.removeById(place.id);
   }
 
+  void _handleExplorePressed(BuildContext context, Place place) {
+    context.go(ScreenPaths.placeArtifacts(place.id));
+  }
+
   @override
   Widget build(BuildContext context) {
     final places = watchX((PlacesLogic o) => o.saved);
@@ -57,13 +61,27 @@ class SavedPlacesScreen extends StatelessWidget with GetItMixin {
                     separatorBuilder: (_, __) => Gap($styles.insets.sm),
                     itemBuilder: (_, i) => PlaceCard(
                       place: places[i],
-                      trailing: AppBtn.basic(
-                        onPressed: () => _handleRemovePressed(context, places[i]),
-                        semanticLabel: $strings.savedPlacesRemove(places[i].name),
-                        child: Padding(
-                          padding: EdgeInsets.all($styles.insets.xs),
-                          child: Icon(Icons.delete_outline, color: $styles.colors.caption),
-                        ),
+                      onTap: () => _handleExplorePressed(context, places[i]),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AppBtn.basic(
+                            onPressed: () => _handleExplorePressed(context, places[i]),
+                            semanticLabel: $strings.placeArtifactsExplore,
+                            child: Padding(
+                              padding: EdgeInsets.all($styles.insets.xs),
+                              child: Icon(Icons.museum_outlined, color: $styles.colors.accent1),
+                            ),
+                          ),
+                          AppBtn.basic(
+                            onPressed: () => _handleRemovePressed(context, places[i]),
+                            semanticLabel: $strings.savedPlacesRemove(places[i].name),
+                            child: Padding(
+                              padding: EdgeInsets.all($styles.insets.xs),
+                              child: Icon(Icons.delete_outline, color: $styles.colors.caption),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

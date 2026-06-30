@@ -476,5 +476,12 @@
 	"@tripDetailRemovePlace": {"placeholders": {"name": {}}},
 	"tripDetailEmptyTitle": "No places in this trip",
 	"tripDetailEmptyBody": "Add saved places to start building this trip.",
-	"tripDetailMissing": "This trip is no longer available."
+	"tripDetailMissing": "This trip is no longer available.",
+	"placeArtifactsExplore": "Explore artifacts",
+	"placeArtifactsTitle": "Artifacts",
+	"placeArtifactsEmpty": "No artifacts found for {country}.",
+	"@placeArtifactsEmpty": {"placeholders": {"country": {}}},
+	"placeArtifactsError": "Couldn't load artifacts. Check your connection and try again.",
+	"placeArtifactsRetry": "Try again",
+	"placeArtifactsMissing": "This place is no longer available."
 }

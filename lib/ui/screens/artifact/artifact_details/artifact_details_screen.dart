@@ -9,16 +9,27 @@ import 'package:wonders/ui/common/modals/fullscreen_url_img_viewer.dart';
 part 'widgets/_info_column.dart';
 part 'widgets/_artifact_image_btn.dart';
 
+/// Where an artifact's metadata + images are loaded from. The wonders use the
+/// pre-baked self-hosted CDN; live per-place artifacts come straight from MET.
+enum ArtifactSource {
+  selfHosted,
+  met;
+
+  static ArtifactSource fromName(String? name) => ArtifactSource.values.asNameMap()[name] ?? ArtifactSource.selfHosted;
+}
+
 class ArtifactDetailsScreen extends StatefulWidget {
-  const ArtifactDetailsScreen({super.key, required this.artifactId});
+  const ArtifactDetailsScreen({super.key, required this.artifactId, this.source = ArtifactSource.selfHosted});
   final String artifactId;
+  final ArtifactSource source;
 
   @override
   State<ArtifactDetailsScreen> createState() => _ArtifactDetailsScreenState();
 }
 
 class _ArtifactDetailsScreenState extends State<ArtifactDetailsScreen> {
-  late final _future = artifactLogic.getArtifactByID(widget.artifactId, selfHosted: true);
+  late final _future =
+      artifactLogic.getArtifactByID(widget.artifactId, selfHosted: widget.source == ArtifactSource.selfHosted);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +48,7 @@ class _ArtifactDetailsScreenState extends State<ArtifactDetailsScreen> {
           } else {
             content = hzMode
                 ? Row(children: [
-                    Expanded(child: _ArtifactImageBtn(data: data!)),
+                    Expanded(child: _ArtifactImageBtn(data: data!, source: widget.source)),
                     Expanded(child: Center(child: SizedBox(width: 600, child: _InfoColumn(data: data)))),
                   ])
                 : CustomScrollView(
@@ -48,7 +59,7 @@ class _ArtifactDetailsScreenState extends State<ArtifactDetailsScreen> {
                         leading: SizedBox.shrink(),
                         expandedHeight: context.heightPx * .5,
                         collapsedHeight: context.heightPx * .35,
-                        flexibleSpace: _ArtifactImageBtn(data: data!),
+                        flexibleSpace: _ArtifactImageBtn(data: data!, source: widget.source),
                       ),
                       SliverToBoxAdapter(child: _InfoColumn(data: data)),
                     ],

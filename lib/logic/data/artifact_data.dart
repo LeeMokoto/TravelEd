@@ -13,12 +13,14 @@ class ArtifactData {
     required this.objectType,
     required this.objectBeginYear,
     required this.objectEndYear,
+    this.imageSmall = '',
   });
   static const String baseSelfHostedImagePath = 'https://www.wonderous.info/met/';
 
   final String objectId; // Artifact ID, used to identify through MET server calls.
   final String title; // Artifact title / name
   final String image; // Artifact primary image URL (can have multiple)
+  final String imageSmall; // Smaller MET primary image URL, used for live grid thumbnails.
   final int objectBeginYear; // Artifact creation year start.
   final int objectEndYear; // Artifact creation year end.
   final String objectType; // Type of thing (coin, basic, cup etc)

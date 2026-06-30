@@ -454,5 +454,12 @@
 	"@tripDetailRemovePlace": {"placeholders": {"name": {}}},
 	"tripDetailEmptyTitle": "此行程暂无地点",
 	"tripDetailEmptyBody": "添加已保存的地点，开始规划这趟行程。",
-	"tripDetailMissing": "该行程已不存在。"
+	"tripDetailMissing": "该行程已不存在。",
+	"placeArtifactsExplore": "探索文物",
+	"placeArtifactsTitle": "文物",
+	"placeArtifactsEmpty": "未找到与 {country} 相关的文物。",
+	"@placeArtifactsEmpty": {"placeholders": {"country": {}}},
+	"placeArtifactsError": "无法加载文物。请检查网络连接后重试。",
+	"placeArtifactsRetry": "重试",
+	"placeArtifactsMissing": "该地点已不存在。"
 }

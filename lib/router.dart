@@ -5,6 +5,7 @@ import 'package:wonders/ui/common/modals//fullscreen_video_viewer.dart';
 import 'package:wonders/ui/common/modals/fullscreen_maps_viewer.dart';
 import 'package:wonders/ui/screens/artifact/artifact_details/artifact_details_screen.dart';
 import 'package:wonders/ui/screens/artifact/artifact_search/artifact_search_screen.dart';
+import 'package:wonders/ui/screens/artifact/place_artifacts/place_artifacts_screen.dart';
 import 'package:wonders/ui/screens/collection/collection_screen.dart';
 import 'package:wonders/ui/screens/home/wonders_home_screen.dart';
 import 'package:wonders/ui/screens/intro/intro_screen.dart';
@@ -32,8 +33,12 @@ class ScreenPaths {
   static String search(WonderType type) => _appendToCurrentPath('/search/${type.name}');
   static String maps(WonderType type) => _appendToCurrentPath('/maps/${type.name}');
   static String timeline(WonderType? type) => _appendToCurrentPath('/timeline?type=${type?.name ?? ''}');
-  static String artifact(String id, {bool append = true}) =>
-      append ? _appendToCurrentPath('/artifact/$id') : '/artifact/$id';
+  static String artifact(String id, {bool append = true, String? src}) {
+    final query = src != null ? '?src=$src' : '';
+    return append ? _appendToCurrentPath('/artifact/$id$query') : '/artifact/$id$query';
+  }
+
+  static String placeArtifacts(String placeId) => '$savedPlaces/$placeId/artifacts';
   static String collection(String id) => _appendToCurrentPath('/collection${id.isEmpty ? '' : '?id=$id'}');
 
   static String _appendToCurrentPath(String newPath) {
@@ -49,7 +54,10 @@ class ScreenPaths {
 // Routes that are used multiple times
 AppRoute get _artifactRoute => AppRoute(
       'artifact/:artifactId',
-      (s) => ArtifactDetailsScreen(artifactId: s.pathParameters['artifactId']!),
+      (s) => ArtifactDetailsScreen(
+        artifactId: s.pathParameters['artifactId']!,
+        source: ArtifactSource.fromName(s.uri.queryParameters['src']),
+      ),
     );
 
 AppRoute get _timelineRoute {
@@ -82,7 +90,13 @@ final appRouter = GoRouter(
           AppRoute(ScreenPaths.home, (_) => HomeScreen(), routes: [
             _timelineRoute,
             _collectionRoute,
-            AppRoute('places', (_) => SavedPlacesScreen()),
+            AppRoute('places', (_) => SavedPlacesScreen(), routes: [
+              AppRoute(
+                ':placeId/artifacts',
+                (s) => PlaceArtifactsScreen(placeId: s.pathParameters['placeId']!),
+                routes: [_artifactRoute],
+              ),
+            ]),
             AppRoute('trips', (_) => TripsScreen(), routes: [
               AppRoute(':tripId', (s) => TripDetailScreen(tripId: s.pathParameters['tripId']!)),
             ]),
