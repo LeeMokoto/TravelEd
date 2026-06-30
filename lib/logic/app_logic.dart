@@ -73,6 +73,9 @@ class AppLogic {
     collectiblesLogic.init();
     await collectiblesLogic.load();
 
+    // Saved Places
+    await placesLogic.load();
+
     // Flag bootStrap as complete
     isBootstrapComplete = true;
 

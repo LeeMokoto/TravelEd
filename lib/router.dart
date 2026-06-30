@@ -9,6 +9,7 @@ import 'package:wonders/ui/screens/collection/collection_screen.dart';
 import 'package:wonders/ui/screens/home/wonders_home_screen.dart';
 import 'package:wonders/ui/screens/intro/intro_screen.dart';
 import 'package:wonders/ui/screens/page_not_found/page_not_found.dart';
+import 'package:wonders/ui/screens/saved_places/saved_places_screen.dart';
 import 'package:wonders/ui/screens/timeline/timeline_screen.dart';
 import 'package:wonders/ui/screens/wonder_details/wonders_details_screen.dart';
 
@@ -18,6 +19,7 @@ class ScreenPaths {
   static String intro = '/welcome';
   static String home = '/home';
   static String settings = '/settings';
+  static String savedPlaces = '$home/places';
 
   static String wonderDetails(WonderType type, {required int tabIndex}) => '$home/wonder/${type.name}?t=$tabIndex';
 
@@ -76,6 +78,7 @@ final appRouter = GoRouter(
           AppRoute(ScreenPaths.home, (_) => HomeScreen(), routes: [
             _timelineRoute,
             _collectionRoute,
+            AppRoute('places', (_) => SavedPlacesScreen()),
             AppRoute(
               'wonder/:detailsType',
               (s) {

@@ -40,6 +40,8 @@ class _HomeMenuState extends State<HomeMenu> {
 
   void _handleCollectionPressed(BuildContext context) => context.go(ScreenPaths.collection(''));
 
+  void _handleSavedPlacesPressed(BuildContext context) => context.go(ScreenPaths.savedPlaces);
+
   void _handleTimelinePressed(BuildContext context) => context.go(ScreenPaths.timeline(widget.data.type));
 
   void _handleWonderPressed(BuildContext context, WonderData data) => Navigator.pop(context, data.type);
@@ -141,6 +143,10 @@ class _HomeMenuState extends State<HomeMenu> {
                   label: $strings.homeMenuButtonView,
                   icon: AppIcons.collection,
                   onPressed: () => _handleCollectionPressed(context)),
+              _MenuTextBtn(
+                  label: $strings.homeMenuButtonSavedPlaces,
+                  icon: AppIcons.reset_location,
+                  onPressed: () => _handleSavedPlacesPressed(context)),
               _MenuTextBtn(
                 label: $strings.homeMenuButtonAbout,
                 icon: AppIcons.info,
