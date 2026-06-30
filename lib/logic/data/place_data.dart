@@ -50,6 +50,10 @@ class Place {
   /// Epoch millis the place was saved; used to order the saved list.
   final int savedAtMs;
 
+  /// Whether this place has real coordinates. [lat]/[lng] default to 0 when a
+  /// place is saved without a precise location yet.
+  bool get hasLocation => lat != 0 || lng != 0;
+
   Place copyWith({
     String? id,
     String? name,
