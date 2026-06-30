@@ -7,6 +7,7 @@ import 'package:wonders/ui/screens/artifact/artifact_details/artifact_details_sc
 import 'package:wonders/ui/screens/artifact/artifact_search/artifact_search_screen.dart';
 import 'package:wonders/ui/screens/artifact/place_artifacts/place_artifacts_screen.dart';
 import 'package:wonders/ui/screens/collection/collection_screen.dart';
+import 'package:wonders/ui/screens/discover/map_discovery_screen.dart';
 import 'package:wonders/ui/screens/home/wonders_home_screen.dart';
 import 'package:wonders/ui/screens/intro/intro_screen.dart';
 import 'package:wonders/ui/screens/itinerary/itinerary_screen.dart';
@@ -24,6 +25,7 @@ class ScreenPaths {
   static String home = '/home';
   static String settings = '/settings';
   static String savedPlaces = '$home/places';
+  static String discover = '$home/discover';
   static String trips = '$home/trips';
   static String tripDetails(String id) => '$trips/$id';
   static String tripItinerary(String id) => '${tripDetails(id)}/itinerary';
@@ -99,6 +101,7 @@ final appRouter = GoRouter(
                 routes: [_artifactRoute],
               ),
             ]),
+            AppRoute('discover', (_) => MapDiscoveryScreen()),
             AppRoute('trips', (_) => TripsScreen(), routes: [
               AppRoute(':tripId', (s) => TripDetailScreen(tripId: s.pathParameters['tripId']!), routes: [
                 AppRoute('itinerary', (s) => ItineraryScreen(tripId: s.pathParameters['tripId']!)),

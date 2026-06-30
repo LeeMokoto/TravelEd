@@ -503,5 +503,11 @@
 	"itinerarySampleNoteSight": "Worth a slow wander.",
 	"itinerarySampleNoteFood": "A good spot to refuel.",
 	"itinerarySampleNoteStay": "Check in and drop your bags.",
-	"itinerarySampleNoteTransit": "Allow a little buffer time."
+	"itinerarySampleNoteTransit": "Allow a little buffer time.",
+	"homeMenuButtonDiscover": "Discover places",
+	"discoverSearchHint": "Search for a place",
+	"discoverTapHint": "Tap the map to drop a pin",
+	"discoverSaveTitle": "Save this place",
+	"discoverSave": "Save place",
+	"discoverSaved": "Saved to your places"
 }

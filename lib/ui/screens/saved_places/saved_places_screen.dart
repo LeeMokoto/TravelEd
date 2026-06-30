@@ -43,13 +43,27 @@ class SavedPlacesScreen extends StatelessWidget with GetItMixin {
           AppHeader(
             title: $strings.savedPlacesTitle,
             isTransparent: true,
-            trailing: (_) => AppBtn.basic(
-              onPressed: () => _handleAddPressed(context),
-              semanticLabel: $strings.savedPlacesAdd,
-              child: Padding(
-                padding: EdgeInsets.all($styles.insets.md),
-                child: Icon(Icons.add, color: $styles.colors.offWhite),
-              ),
+            trailing: (_) => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppBtn.basic(
+                  onPressed: () => context.go(ScreenPaths.discover),
+                  semanticLabel: $strings.homeMenuButtonDiscover,
+                  child: Padding(
+                    padding: EdgeInsets.all($styles.insets.sm),
+                    child: Icon(Icons.map_outlined, color: $styles.colors.offWhite),
+                  ),
+                ),
+                AppBtn.basic(
+                  onPressed: () => _handleAddPressed(context),
+                  semanticLabel: $strings.savedPlacesAdd,
+                  child: Padding(
+                    padding: EdgeInsets.all($styles.insets.sm),
+                    child: Icon(Icons.add, color: $styles.colors.offWhite),
+                  ),
+                ),
+                Gap($styles.insets.xs),
+              ],
             ),
           ),
           Expanded(

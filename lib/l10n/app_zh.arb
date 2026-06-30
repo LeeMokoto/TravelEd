@@ -481,5 +481,11 @@
 	"itinerarySampleNoteSight": "值得慢慢游览。",
 	"itinerarySampleNoteFood": "补充能量的好去处。",
 	"itinerarySampleNoteStay": "办理入住，放下行李。",
-	"itinerarySampleNoteTransit": "预留一点缓冲时间。"
+	"itinerarySampleNoteTransit": "预留一点缓冲时间。",
+	"homeMenuButtonDiscover": "发现地点",
+	"discoverSearchHint": "搜索地点",
+	"discoverTapHint": "点按地图放置图钉",
+	"discoverSaveTitle": "保存此地点",
+	"discoverSave": "保存地点",
+	"discoverSaved": "已保存到你的地点"
 }
