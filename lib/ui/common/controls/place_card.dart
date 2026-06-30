@@ -22,7 +22,7 @@ class PlaceCard extends StatelessWidget {
       padding: EdgeInsets.all($styles.insets.sm),
       child: Row(
         children: [
-          _KindBadge(kind: place.kind),
+          _Leading(place: place),
           Gap($styles.insets.sm),
           Expanded(
             child: Column(
@@ -64,6 +64,28 @@ class PlaceCard extends StatelessWidget {
       onPressed: onTap,
       semanticLabel: place.name,
       child: content,
+    );
+  }
+}
+
+/// The card's leading visual: the place's photo when it has one, otherwise a
+/// terracotta kind-badge. Both are the same 44pt rounded square.
+class _Leading extends StatelessWidget {
+  const _Leading({required this.place});
+  final Place place;
+
+  @override
+  Widget build(BuildContext context) {
+    if (place.imageUrl.isEmpty) return _KindBadge(kind: place.kind);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular($styles.corners.sm),
+      child: Image.network(
+        place.imageUrl,
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _KindBadge(kind: place.kind),
+      ),
     );
   }
 }

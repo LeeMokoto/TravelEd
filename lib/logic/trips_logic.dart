@@ -2,6 +2,7 @@ import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/common/save_load_mixin.dart';
 import 'package:wonders/logic/data/place_data.dart';
 import 'package:wonders/logic/data/trip_data.dart';
+import 'package:wonders/logic/unsplash_search_service.dart';
 
 /// Owns the user's trips (build step B). A trip groups saved places under a
 /// destination and dates. Registered as a `get_it` singleton in
@@ -10,6 +11,8 @@ import 'package:wonders/logic/data/trip_data.dart';
 class TripsLogic with ThrottledSaveLoadMixin {
   @override
   String get fileName => 'trips.dat';
+
+  final _images = UnsplashSearchService();
 
   /// All trips, ordered most-recently-created first. Views `watchX` this.
   late final ValueNotifier<List<Trip>> trips = ValueNotifier<List<Trip>>([]);
@@ -34,7 +37,20 @@ class TripsLogic with ThrottledSaveLoadMixin {
     final list = List<Trip>.of(trips.value)..insert(0, trip);
     trips.value = list;
     scheduleSave();
+    _enrichCover(trip); // fire-and-forget: fills in a hero photo if a key is set
     return trip;
+  }
+
+  /// Look up a cover photo for [trip] by title and store it once it arrives.
+  /// Runs in the background; no-ops without an Unsplash key, if the trip was
+  /// removed, or if it already has a cover.
+  Future<void> _enrichCover(Trip trip) async {
+    if (!_images.hasApiKey || trip.coverImageUrl.isNotEmpty) return;
+    final url = await _images.findPhotoUrl(trip.title);
+    if (url == null) return;
+    final current = fromId(trip.id);
+    if (current == null || current.coverImageUrl.isNotEmpty) return;
+    update(current.copyWith(coverImageUrl: url));
   }
 
   /// Replace the stored trip that shares [trip]'s id. No-op if it isn't found.

@@ -1,6 +1,7 @@
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/common/save_load_mixin.dart';
 import 'package:wonders/logic/data/place_data.dart';
+import 'package:wonders/logic/unsplash_search_service.dart';
 
 /// Owns the user's saved places — the foundation that Trips and the AI
 /// itinerary build on. Registered as a `get_it` singleton in [registerSingletons]
@@ -8,6 +9,8 @@ import 'package:wonders/logic/data/place_data.dart';
 class PlacesLogic with ThrottledSaveLoadMixin {
   @override
   String get fileName => 'places.dat';
+
+  final _images = UnsplashSearchService();
 
   /// All saved places, ordered most-recently-saved first. Reactive: views
   /// `watchX` this to rebuild when the list changes.
@@ -26,6 +29,16 @@ class PlacesLogic with ThrottledSaveLoadMixin {
   void add(Place place) {
     final list = List<Place>.of(saved.value)..removeWhere((p) => p.id == place.id);
     list.insert(0, place);
+    saved.value = list;
+    scheduleSave();
+  }
+
+  /// Replace a place in place (preserving its order). No-op if it isn't found.
+  void update(Place place) {
+    final list = List<Place>.of(saved.value);
+    final i = list.indexWhere((p) => p.id == place.id);
+    if (i == -1) return;
+    list[i] = place;
     saved.value = list;
     scheduleSave();
   }
@@ -54,7 +67,21 @@ class PlacesLogic with ThrottledSaveLoadMixin {
       savedAtMs: now,
     );
     add(place);
+    _enrichImage(place); // fire-and-forget: fills in a photo if a key is set
     return place;
+  }
+
+  /// Look up a photo for [place] by name and store it once it arrives. Runs in
+  /// the background; safely no-ops without an Unsplash key, if the place was
+  /// removed, or if it already has an image.
+  Future<void> _enrichImage(Place place) async {
+    if (!_images.hasApiKey || place.imageUrl.isNotEmpty) return;
+    final query = place.country.isNotEmpty ? '${place.name}, ${place.country}' : place.name;
+    final url = await _images.findPhotoUrl(query);
+    if (url == null) return;
+    final current = fromId(place.id);
+    if (current == null || current.imageUrl.isNotEmpty) return;
+    update(current.copyWith(imageUrl: url));
   }
 
   void removeById(String id) {
