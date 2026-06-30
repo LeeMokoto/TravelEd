@@ -1,0 +1,22 @@
+# App Store Connect / Apple Developer configuration for fastlane.
+#
+# Values are read from environment variables so the same config works locally
+# and in CI without committing account-specific data. Override the defaults by
+# exporting the variables below (see docs/CICD_TESTFLIGHT.md).
+
+# Treat an unset OR empty env var as "not provided" (GitHub Actions injects
+# undefined vars.* as empty strings, which are truthy in Ruby).
+def appfile_env(key, default = nil)
+  value = ENV[key].to_s.strip
+  value.empty? ? default : value
+end
+
+app_identifier(appfile_env("IOS_APP_IDENTIFIER", "com.leepo.wonders"))
+
+apple_id_value = appfile_env("FASTLANE_APPLE_ID")
+apple_id(apple_id_value) if apple_id_value
+
+itc_team = appfile_env("APP_STORE_CONNECT_TEAM_ID")
+itc_team_id(itc_team) if itc_team
+
+team_id(appfile_env("APPLE_TEAM_ID", "R7PC88FD6R"))

@@ -32,3 +32,20 @@ Runner/GeneratedPluginRegistrant.*
 !default.mode2v3
 !default.pbxuser
 !default.perspectivev3
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/README.md
+*.log
+
+# Build / signing artifacts produced in CI
+*.ipa
+*.app.dSYM.zip
+*.mobileprovision
+*.p12
+*.p8
+AuthKey_*.p8
+ExportOptions.plist

@@ -1,0 +1,31 @@
+# fastlane match configuration (https://docs.fastlane.tools/actions/match/).
+#
+# match stores your signing certificates and provisioning profiles in a private,
+# encrypted git repository. If you already have a match repo from another
+# project you can reuse it here, it can hold credentials for multiple apps.
+#
+# Required environment variables:
+#   MATCH_GIT_URL   - git URL of your private certificates repo
+#   MATCH_PASSWORD  - passphrase used to encrypt/decrypt the repo contents
+
+# Treat an unset OR empty env var as "not provided".
+def matchfile_env(key, default = nil)
+  value = ENV[key].to_s.strip
+  value.empty? ? default : value
+end
+
+git_url_value = matchfile_env("MATCH_GIT_URL")
+git_url(git_url_value) if git_url_value
+
+git_branch_value = matchfile_env("MATCH_GIT_BRANCH")
+git_branch(git_branch_value) if git_branch_value
+
+storage_mode("git")
+type("appstore")
+
+app_id = matchfile_env("IOS_APP_IDENTIFIER", "com.leepo.wonders")
+widget_id = matchfile_env("IOS_WIDGET_APP_IDENTIFIER", "#{app_id}.Wonderous-Widget")
+app_identifier([app_id, widget_id].uniq)
+
+# In CI we never want match to generate new certificates, only fetch existing ones.
+readonly(ENV["CI"] == "true")
