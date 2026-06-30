@@ -1,0 +1,82 @@
+name: TestFlight
+
+# Build the iOS app and ship it to TestFlight.
+#
+# Trigger manually from the Actions tab, or automatically when a version tag
+# (e.g. v2.2.3) is pushed. See docs/CICD_TESTFLIGHT.md for the list of secrets
+# this workflow expects.
+on:
+  workflow_dispatch:
+    inputs:
+      build_name:
+        description: "Marketing version (e.g. 2.2.3). Leave blank to use pubspec.yaml."
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: testflight-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-upload:
+    name: Build & upload to TestFlight
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    env:
+      # Authentication (App Store Connect API key)
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+      # Code signing (fastlane match)
+      MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      # App configuration (optional overrides; defaults live in fastlane config)
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      IOS_APP_IDENTIFIER: ${{ vars.IOS_APP_IDENTIFIER }}
+      IOS_WIDGET_APP_IDENTIFIER: ${{ vars.IOS_WIDGET_APP_IDENTIFIER }}
+      # Provided so the build name flows from the manual dispatch input.
+      BUILD_NAME: ${{ inputs.build_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode_15.4.app
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Upload to TestFlight
+        working-directory: ios
+        run: bundle exec fastlane beta
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-output
+          path: |
+            ios/build/ios/ipa/*.ipa
+            ios/build/ios/ipa/*.app.dSYM.zip
+            ios/fastlane/*.log
+          if-no-files-found: ignore
+          retention-days: 14

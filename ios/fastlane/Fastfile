@@ -1,0 +1,153 @@
+default_platform(:ios)
+
+# Reads an env var, treating an unset OR empty value as "not provided".
+# (GitHub Actions injects undefined `vars.*` as empty strings, which are
+# truthy in Ruby, so a plain `||` fallback would not work.)
+def env_or(key, default)
+  value = ENV[key].to_s.strip
+  value.empty? ? default : value
+end
+
+# --- Configuration ---------------------------------------------------------
+# Bundle identifiers. Override via env vars to point the pipeline at your own
+# App Store Connect app + widget extension without editing this file.
+APP_IDENTIFIER = env_or("IOS_APP_IDENTIFIER", "com.leepo.wonders")
+WIDGET_IDENTIFIER = env_or("IOS_WIDGET_APP_IDENTIFIER", "#{APP_IDENTIFIER}.Wonderous-Widget")
+ALL_IDENTIFIERS = [APP_IDENTIFIER, WIDGET_IDENTIFIER].uniq
+
+TEAM_ID = env_or("APPLE_TEAM_ID", "R7PC88FD6R")
+
+# Xcode target names (see ios/Runner.xcodeproj). bundle_id -> target.
+TARGETS_BY_IDENTIFIER = {
+  APP_IDENTIFIER => "Runner",
+  WIDGET_IDENTIFIER => "WonderousWidgetExtension"
+}.freeze
+
+platform :ios do
+  desc "Build the iOS app and upload it to TestFlight"
+  desc "Required env: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID,"
+  desc "APP_STORE_CONNECT_API_KEY_CONTENT (base64), MATCH_GIT_URL, MATCH_PASSWORD"
+  lane :beta do
+    # Creates a temporary keychain on CI runners so certs can be imported safely.
+    setup_ci
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_ISSUER_ID"),
+      key_content: ENV.fetch("APP_STORE_CONNECT_API_KEY_CONTENT"),
+      is_key_content_base64: true,
+      in_house: false
+    )
+
+    # Fetch signing certificates + provisioning profiles via match.
+    match(
+      type: "appstore",
+      app_identifier: ALL_IDENTIFIERS,
+      api_key: api_key,
+      readonly: is_ci
+    )
+
+    build_number = resolve_build_number(api_key)
+    UI.message("Using build number #{build_number}")
+
+    # Compile the Flutter (Dart + assets) layer and bake the version/build
+    # metadata into ios/Flutter/Generated.xcconfig, which gym reads when it
+    # archives. Signing is handled below, so build without it here.
+    compile_flutter(build_number)
+
+    # Force manual signing for the archive so gym uses the match profiles
+    # instead of trying to talk to the developer portal during the build.
+    ALL_IDENTIFIERS.each do |identifier|
+      update_code_signing_settings(
+        use_automatic_signing: false,
+        path: "Runner.xcodeproj",
+        team_id: TEAM_ID,
+        targets: [TARGETS_BY_IDENTIFIER.fetch(identifier)],
+        bundle_identifier: identifier,
+        code_sign_identity: "Apple Distribution",
+        profile_name: profile_name_for(identifier)
+      )
+    end
+
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      clean: true,
+      export_method: "app-store",
+      output_directory: "build/ios/ipa",
+      output_name: "Runner.ipa",
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        provisioningProfiles: provisioning_profile_map
+      }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      changelog: changelog_text
+    )
+  end
+end
+
+# --- Helpers ---------------------------------------------------------------
+# Defined at the top level so they are reliably available inside lanes.
+
+# Build number resolution priority:
+#   1. BUILD_NUMBER env var (explicit override)
+#   2. latest build on TestFlight + 1 (avoids "build already exists" errors)
+#   3. fall back to 1
+def resolve_build_number(api_key)
+  override = ENV["BUILD_NUMBER"].to_s.strip
+  return override unless override.empty?
+
+  latest = begin
+    latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: APP_IDENTIFIER,
+      initial_build_number: 0
+    )
+  rescue StandardError => e
+    UI.important("Could not read latest TestFlight build number (#{e.message}); starting at 0")
+    0
+  end
+
+  (latest.to_i + 1).to_s
+end
+
+def compile_flutter(build_number)
+  build_name = ENV["BUILD_NAME"].to_s.strip
+  args = ["flutter", "build", "ios", "--release", "--no-codesign", "--build-number=#{build_number}"]
+  args << "--build-name=#{build_name}" unless build_name.empty?
+
+  # Fastlane runs from the ios/ directory; the Flutter project root is one up.
+  Dir.chdir("..") { sh(*args) }
+end
+
+# match exports the installed profile name into the environment as
+# sigh_<bundle_id>_appstore_profile-name.
+def profile_name_for(identifier)
+  ENV["sigh_#{identifier}_appstore_profile-name"] ||
+    ENV["sigh_#{identifier}_appstore"] ||
+    "match AppStore #{identifier}"
+end
+
+def provisioning_profile_map
+  ALL_IDENTIFIERS.each_with_object({}) do |identifier, map|
+    map[identifier] = profile_name_for(identifier)
+  end
+end
+
+def changelog_text
+  explicit = ENV["TESTFLIGHT_CHANGELOG"].to_s.strip
+  return explicit unless explicit.empty?
+
+  notes_path = File.expand_path("../../release_notes.txt", __dir__)
+  return File.read(notes_path) if File.exist?(notes_path)
+
+  "New build from CI."
+end
