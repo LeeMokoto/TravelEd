@@ -76,6 +76,9 @@ class AppLogic {
     // Saved Places
     await placesLogic.load();
 
+    // Trips
+    await tripsLogic.load();
+
     // Flag bootStrap as complete
     isBootstrapComplete = true;
 

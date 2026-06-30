@@ -1,15 +1,20 @@
-part of '../saved_places_screen.dart';
+import 'package:wonders/common_libs.dart';
+import 'package:wonders/logic/data/place_data.dart';
+import 'package:wonders/ui/common/place_kind_ui.dart';
 
-/// A single saved place, rendered as a parchment card in the inherited
-/// Wonderous aesthetic: a terracotta kind-badge, place name, and country.
-class _PlaceCard extends StatelessWidget {
-  const _PlaceCard({required this.place, required this.onRemove});
+/// A place rendered as a parchment card in the inherited Wonderous aesthetic:
+/// a terracotta kind-badge, name, country, and optional note. Shared by Saved
+/// Places and Trips (and, later, the itinerary). Pass [trailing] for a
+/// per-context action (remove, add, etc.) and [onTap] to make it tappable.
+class PlaceCard extends StatelessWidget {
+  const PlaceCard({super.key, required this.place, this.onTap, this.trailing});
   final Place place;
-  final VoidCallback onRemove;
+  final VoidCallback? onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final content = Container(
       decoration: BoxDecoration(
         color: $styles.colors.offWhite,
         borderRadius: BorderRadius.circular($styles.corners.md),
@@ -49,16 +54,16 @@ class _PlaceCard extends StatelessWidget {
               ],
             ),
           ),
-          AppBtn.basic(
-            onPressed: onRemove,
-            semanticLabel: $strings.savedPlacesRemove(place.name),
-            child: Padding(
-              padding: EdgeInsets.all($styles.insets.xs),
-              child: Icon(Icons.delete_outline, color: $styles.colors.caption),
-            ),
-          ),
+          if (trailing != null) ...[Gap($styles.insets.xs), trailing!],
         ],
       ),
+    );
+
+    if (onTap == null) return content;
+    return AppBtn.basic(
+      onPressed: onTap,
+      semanticLabel: place.name,
+      child: content,
     );
   }
 }
@@ -78,33 +83,5 @@ class _KindBadge extends StatelessWidget {
       ),
       child: Icon(kind.icon, color: $styles.colors.white, size: 22),
     );
-  }
-}
-
-extension PlaceKindUi on PlaceKind {
-  IconData get icon {
-    switch (this) {
-      case PlaceKind.sight:
-        return Icons.photo_camera_outlined;
-      case PlaceKind.food:
-        return Icons.restaurant;
-      case PlaceKind.stay:
-        return Icons.hotel_outlined;
-      case PlaceKind.transit:
-        return Icons.directions_transit_outlined;
-    }
-  }
-
-  String get label {
-    switch (this) {
-      case PlaceKind.sight:
-        return $strings.savedPlacesKindSight;
-      case PlaceKind.food:
-        return $strings.savedPlacesKindFood;
-      case PlaceKind.stay:
-        return $strings.savedPlacesKindStay;
-      case PlaceKind.transit:
-        return $strings.savedPlacesKindTransit;
-    }
   }
 }

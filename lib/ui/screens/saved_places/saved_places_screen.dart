@@ -3,9 +3,10 @@ import 'package:wonders/logic/data/place_data.dart';
 import 'package:wonders/logic/places_logic.dart';
 import 'package:wonders/ui/common/app_icons.dart';
 import 'package:wonders/ui/common/controls/app_header.dart';
+import 'package:wonders/ui/common/controls/place_card.dart';
 import 'package:wonders/ui/common/modals/app_modals.dart';
+import 'package:wonders/ui/common/place_kind_ui.dart';
 
-part 'widgets/_place_card.dart';
 part 'widgets/_add_place_sheet.dart';
 
 /// Lists the user's saved places. The foundation feature (build step A): a
@@ -54,9 +55,16 @@ class SavedPlacesScreen extends StatelessWidget with GetItMixin {
                     padding: EdgeInsets.all($styles.insets.lg),
                     itemCount: places.length,
                     separatorBuilder: (_, __) => Gap($styles.insets.sm),
-                    itemBuilder: (_, i) => _PlaceCard(
+                    itemBuilder: (_, i) => PlaceCard(
                       place: places[i],
-                      onRemove: () => _handleRemovePressed(context, places[i]),
+                      trailing: AppBtn.basic(
+                        onPressed: () => _handleRemovePressed(context, places[i]),
+                        semanticLabel: $strings.savedPlacesRemove(places[i].name),
+                        child: Padding(
+                          padding: EdgeInsets.all($styles.insets.xs),
+                          child: Icon(Icons.delete_outline, color: $styles.colors.caption),
+                        ),
+                      ),
                     ),
                   ),
           ),

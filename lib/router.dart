@@ -11,6 +11,8 @@ import 'package:wonders/ui/screens/intro/intro_screen.dart';
 import 'package:wonders/ui/screens/page_not_found/page_not_found.dart';
 import 'package:wonders/ui/screens/saved_places/saved_places_screen.dart';
 import 'package:wonders/ui/screens/timeline/timeline_screen.dart';
+import 'package:wonders/ui/screens/trips/trip_detail_screen.dart';
+import 'package:wonders/ui/screens/trips/trips_screen.dart';
 import 'package:wonders/ui/screens/wonder_details/wonders_details_screen.dart';
 
 /// Shared paths / urls used across the app
@@ -20,6 +22,8 @@ class ScreenPaths {
   static String home = '/home';
   static String settings = '/settings';
   static String savedPlaces = '$home/places';
+  static String trips = '$home/trips';
+  static String tripDetails(String id) => '$trips/$id';
 
   static String wonderDetails(WonderType type, {required int tabIndex}) => '$home/wonder/${type.name}?t=$tabIndex';
 
@@ -79,6 +83,9 @@ final appRouter = GoRouter(
             _timelineRoute,
             _collectionRoute,
             AppRoute('places', (_) => SavedPlacesScreen()),
+            AppRoute('trips', (_) => TripsScreen(), routes: [
+              AppRoute(':tripId', (s) => TripDetailScreen(tripId: s.pathParameters['tripId']!)),
+            ]),
             AppRoute(
               'wonder/:detailsType',
               (s) {
