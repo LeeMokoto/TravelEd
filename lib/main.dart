@@ -7,6 +7,7 @@ import 'package:wonders/logic/artifact_api_service.dart';
 import 'package:wonders/logic/collectibles_logic.dart';
 import 'package:wonders/logic/native_widget_service.dart';
 import 'package:wonders/logic/locale_logic.dart';
+import 'package:wonders/logic/itinerary_logic.dart';
 import 'package:wonders/logic/places_logic.dart';
 import 'package:wonders/logic/timeline_logic.dart';
 import 'package:wonders/logic/trips_logic.dart';
@@ -77,6 +78,8 @@ void registerSingletons() {
   GetIt.I.registerLazySingleton<PlacesLogic>(() => PlacesLogic());
   // Trips
   GetIt.I.registerLazySingleton<TripsLogic>(() => TripsLogic());
+  // Itineraries
+  GetIt.I.registerLazySingleton<ItineraryLogic>(() => ItineraryLogic());
   // Localizations
   GetIt.I.registerLazySingleton<LocaleLogic>(() => LocaleLogic());
   // Home Widget Service
@@ -94,6 +97,7 @@ ArtifactAPILogic get artifactLogic => GetIt.I.get<ArtifactAPILogic>();
 CollectiblesLogic get collectiblesLogic => GetIt.I.get<CollectiblesLogic>();
 PlacesLogic get placesLogic => GetIt.I.get<PlacesLogic>();
 TripsLogic get tripsLogic => GetIt.I.get<TripsLogic>();
+ItineraryLogic get itineraryLogic => GetIt.I.get<ItineraryLogic>();
 LocaleLogic get localeLogic => GetIt.I.get<LocaleLogic>();
 
 /// Global helpers for readability

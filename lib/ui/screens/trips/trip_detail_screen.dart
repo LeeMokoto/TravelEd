@@ -1,5 +1,6 @@
 import 'package:wonders/common_libs.dart';
 import 'package:wonders/logic/data/trip_data.dart';
+import 'package:wonders/logic/itinerary_logic.dart';
 import 'package:wonders/logic/places_logic.dart';
 import 'package:wonders/logic/trips_logic.dart';
 import 'package:wonders/ui/common/controls/app_header.dart';
@@ -31,11 +32,14 @@ class TripDetailScreen extends StatelessWidget with GetItMixin {
     await showModal(context, child: AddPlacesSheet(tripId: tripId));
   }
 
+  void _handleOpenItinerary(BuildContext context) => context.push(ScreenPaths.tripItinerary(tripId));
+
   @override
   Widget build(BuildContext context) {
     // Rebuild on trip changes (dates, place membership) and on place changes.
     final trip = watchX((TripsLogic o) => o.trips).firstWhereOrNull((t) => t.id == tripId);
     watchX((PlacesLogic o) => o.saved);
+    final hasItinerary = watchX((ItineraryLogic o) => o.byTripId).containsKey(tripId);
 
     if (trip == null) {
       // The trip was deleted (eg. from elsewhere) — fall back to the list.
@@ -72,6 +76,15 @@ class TripDetailScreen extends StatelessWidget with GetItMixin {
             ),
           ),
           _SummaryBar(dates: dates, placeCount: places.length),
+          Padding(
+            padding: EdgeInsets.fromLTRB($styles.insets.lg, 0, $styles.insets.lg, $styles.insets.sm),
+            child: AppBtn.from(
+              onPressed: () => _handleOpenItinerary(context),
+              text: hasItinerary ? $strings.tripDetailViewItinerary : $strings.tripDetailCreateItinerary,
+              expand: true,
+              bgColor: $styles.colors.accent1,
+            ),
+          ),
           Expanded(
             child: places.isEmpty
                 ? _EmptyPlaces(onAdd: () => _handleAddPlaces(context))

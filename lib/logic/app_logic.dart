@@ -79,6 +79,9 @@ class AppLogic {
     // Trips
     await tripsLogic.load();
 
+    // Itineraries
+    await itineraryLogic.load();
+
     // Flag bootStrap as complete
     isBootstrapComplete = true;
 

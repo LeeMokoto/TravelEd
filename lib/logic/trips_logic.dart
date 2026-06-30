@@ -50,6 +50,7 @@ class TripsLogic with ThrottledSaveLoadMixin {
   void removeById(String id) {
     if (fromId(id) == null) return;
     trips.value = List<Trip>.of(trips.value)..removeWhere((t) => t.id == id);
+    itineraryLogic.removeForTrip(id); // drop any generated itinerary for this trip
     scheduleSave();
   }
 
