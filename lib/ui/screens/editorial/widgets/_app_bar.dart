@@ -5,7 +5,7 @@ class _AppBar extends StatelessWidget {
   final WonderType wonderType;
   final ValueNotifier<int> sectionIndex;
   final ValueNotifier<double> scrollPos;
-  final _titleValues = [
+  final List<String> _titleValues = [
     $strings.appBarTitleFactsHistory,
     $strings.appBarTitleConstruction,
     $strings.appBarTitleLocation,
